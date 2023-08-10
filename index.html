@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>薪資試算系統</title>
+  <style>
+    /* CSS樣式設定 */
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 400px;
+      margin: 50px auto;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .input-group {
+      margin-bottom: 10px;
+    }
+    .input-group label {
+      display: inline-block;
+      width: 200px;
+      text-align: left;
+    }
+    .input-group input {
+      width: 150px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .input-group input[type="number"]::-webkit-inner-spin-button,
+    .input-group input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .result {
+      font-weight: bold;
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    .note {
+      font-size: smaller;
+      color: #888;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="font-style: italic;">KKA的薪資試算系統</h1>
+
+    <div class="input-group">
+      <label>輸入你的時薪：</label>
+      <input type="number" id="hourlyRate" step="0.01">
+    </div>
+
+    <div class="input-group">
+      <label>平日上班天數(8小時)：</label>
+      <input type="number" id="regularWorkDays" step="1" min="1" max="25">
+    </div>
+
+    <div class="input-group">
+      <label>平日加班兩小時天數：</label>
+      <input type="number" id="overtime2HoursDays" step="1" min="0">
+    </div>
+
+    <div class="input-group">
+      <label>平日在加班兩小時天數：</label>
+      <input type="number" id="overtime2HoursMoreDays" step="1" min="0">
+    </div>
+    <p class="note">（注意：如果只加班一小時請總天數*0.5）</p>
+    <br>
+    <hr>
+    <br>
+
+    <div class="input-group">
+      <label>休息日加班天數(8小時)：</label>
+      <input type="number" id="weekendOvertimeDays" step="1" min="0" max="12">
+    </div>
+
+    <div class="input-group">
+      <label>休息日加班兩小時天數：</label>
+      <input type="number" id="weekendOvertime2HoursDays" step="1" min="0">
+    </div>
+        <div class="input-group">
+      <label>休息日在加班兩小時天數：</label>
+      <input type="number" id="weekendOvertime2HoursMoreDays" step="1" min="0">
+    </div>
+
+    <p class="note">（注意：沒有的內容請填零）</p>
+
+    <br>
+    <hr>
+    <br>
+
+    <div class="input-group">
+      <label>例假日加班時數（總時數：</label>
+      <input type="number" id="holidayOvertimeHours" step="1" min="0">
+    </div>
+
+
+    <button onclick="calculateSalary()">試算</button>
+
+    <div class="result" id="result"></div>
+
+    <script>
+      function calculateSalary() {
+        // 獲取輸入值
+        var hourlyRate = parseFloat(document.getElementById("hourlyRate").value);
+        var regularWorkDays = parseInt(document.getElementById("regularWorkDays").value);
+        var overtime2HoursDays = parseInt(document.getElementById("overtime2HoursDays").value);
+        var overtime2HoursMoreDays = parseInt(document.getElementById("overtime2HoursMoreDays").value);
+        var weekendOvertimeDays = parseInt(document.getElementById("weekendOvertimeDays").value);
+        var weekendOvertime2HoursDays = parseInt(document.getElementById("weekendOvertime2HoursDays").value);
+        var weekendOvertime2HoursMoreDays = parseInt(document.getElementById("weekendOvertime2HoursMoreDays").value);
+        var holidayOvertimeHours = parseInt(document.getElementById("holidayOvertimeHours").value);
+        var totalWorkDays = regularWorkDays + weekendOvertimeDays;
+  
+        // 檢查限制條件
+        if (overtime2HoursDays < overtime2HoursMoreDays) {
+          alert("平日在加班兩小時天數不能大於平日加班兩小時天數");
+          return;
+        }
+
+        if (overtime2HoursDays > regularWorkDays) {
+          alert("平日加班兩小時天數不能大於平日上班天數");
+          return;
+        }
+
+        if (regularWorkDays > 25) {
+          alert("平日上班天數不能大於25");
+          return;
+        }
+
+        if (weekendOvertime2HoursDays < weekendOvertime2HoursMoreDays) {
+          alert("休息日在加班兩小時天數不能大於休息日加班兩小時天數");
+          return;
+        }
+
+        if (weekendOvertime2HoursDays > weekendOvertimeDays) {
+          alert("休息日加班兩小時天數不能大於休息日加班天數");
+          return;
+        }
+
+        if (weekendOvertimeDays > 12) {
+          alert("休息日加班天數不能大於12");
+          return;
+        }
+
+        if (totalWorkDays > 31) {
+          alert("平日上班天數加休息日加班天數不能大於31");
+          return;
+        }
+        if (holidayOvertimeHours > 84) {
+          alert("例假日上班天數不會大於84小時");
+          return;
+        }
+
+        // 計算薪資
+        var regularSalary = hourlyRate * 8;
+        var overtime2HoursSalary = 322 * 2;
+        var overtime2HoursMoreSalary = 401 * 2;
+        var weekendOvertimeSalary = 322 * 2 + 401 * 6;
+        var weekendOvertime2HoursSalary = 641 * 2;
+        var weekendOvertime2HoursMoreSalary = 641 * 2;
+        var holidayOvertimeSalary = hourlyRate * 2;
+
+        // // 計算薪資
+        // var regularSalary = hourlyRate * 8;
+        // var overtime2HoursSalary = hourlyRate * 1.34 * 2;
+        // var overtime2HoursMoreSalary = hourlyRate * 1.67 * 2;
+        // var weekendOvertimeSalary = hourlyRate * 1.34 * 2 + hourlyRate * 1.67 * 6;
+        // var weekendOvertime2HoursSalary = hourlyRate * 2.67 * 2;
+        // var weekendOvertime2HoursMoreSalary = hourlyRate * 2.67 * 2;
+        // var holidayOvertimeSalary = hourlyRate * 2;
+
+        var totalSalary =
+          regularSalary * regularWorkDays +
+          overtime2HoursSalary * overtime2HoursDays +
+          overtime2HoursMoreSalary * overtime2HoursMoreDays +
+          weekendOvertimeSalary * weekendOvertimeDays +
+          weekendOvertime2HoursSalary * weekendOvertime2HoursDays +
+          weekendOvertime2HoursMoreSalary * weekendOvertime2HoursMoreDays+holidayOvertimeSalary * holidayOvertimeHours;
+
+                // 顯示結果
+        document.getElementById("result").textContent = "總薪資：" + totalSalary.toFixed(2);
+      }
+    </script>
+  </div>
+</body>
+</html>
+
